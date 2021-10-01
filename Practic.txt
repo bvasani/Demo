@@ -1,0 +1,39 @@
+SWITCH
+
+enable
+config t
+VLAN 10
+exit
+VLAN20
+
+show vlan brief
+
+interface fast0/1
+switch port access vlan 10
+switch mode access
+exit
+	
+interface fast0/2
+switch port access vlan 20
+switch mode access
+exit
+
+interface g0/1
+no shu
+switchport mode trunk
+
+
+Router
+
+interface g0/0.10
+ip address 192.168.10.1 255.255.255.0 
+encapaulation dotIQ 10
+ip address 192.168.10.1 255.255.255.0 
+exit
+
+interface g0/0.20
+ip address 192.168.20.1 255.255.255.0 
+encapaulation dotIQ 20
+ip address 192.168.20.1 255.255.255.0 
+exit
+
