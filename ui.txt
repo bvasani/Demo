@@ -1,0 +1,464 @@
+npm i
+
+***Inside the API***
+
+-------------------------------------------------------------------------------------
+
+***Models->Movie.js
+
+var mongoose = require('mongoose');
+
+var movieSchema = mongoose.Schema({
+    name:String,
+    rating:Number
+})
+
+module.exports = mongoose.model("movies",movieSchema)
+
+-------------------------------------------------------------------------------------
+
+***index.js
+var mongoose = require('mongoose')
+var express = require('express')
+var route = require('./routes')
+var bodyParser = require('body-parser')
+const cors = require("cors");
+
+mongoose.connect('mongodb+srv://studentdb:studentdb123@mycluster.jtfqi.mongodb.net/Student?retryWrites=true&w=majority').then(() => {
+**or**
+mongoose.connect("mongodb://127.0.0.1:27017/SPElectronics").then(() => {
+
+    console.log('Router Connected...!!')
+
+    //app = express();
+    //app.use(cors());
+    //app.use(express.json())
+    app.use(bodyParser.urlencoded({ extended: false }))
+    app.use('/api', route)
+
+    app.get('/', (req, res) => {
+        res.sendFile('index.html', { root: __dirname })
+    })
+
+    app.listen((process.env.PORT || 3000), () => {
+        console.log('Server Started Successfully...!!')
+    })
+}).catch((e) => {
+    console.log(e.toString())
+})
+
+-------------------------------------------------------------------------------------
+
+***routes.js***
+var express = require('express');
+var router = express.Router();
+var Movie = require('./Models/Movie')
+
+//to fetch movies
+router.get('/movies',async(req,res)=>{
+    const imovie = await Movie.find()
+    res.send(imovie)
+})
+
+//to add the movies
+
+router.post("/movies",async(req,res)=>{
+    
+    const imovie = new Movie({
+        name:req.body.name,
+        rating:req.body.rating
+    })
+
+    console.log(imovie)
+    await imovie.save((err,msg)=>{
+        if(err){
+            res.status(500).json({
+                "error":err
+            })
+        }
+        else{
+            res.status(200).json({
+                "My-message":msg
+            })
+        }
+    })
+
+})
+
+
+// api for updating movie
+
+router.patch('/movies/:id',async (req,res)=>{
+    const imovie = await Movie.findOne({_id:req.params.id})
+    imovie.name = req.body.name
+    imovie.rating = req.body.rating
+    await imovie.save((err,msg)=>{
+        if(err){
+            res.status(500).json({
+                error:err
+            })
+        }
+        else{
+            res.status(200).json({
+                msg:msg
+            })
+        }
+    })
+
+})
+
+//delete api
+
+router.delete("/movies/:name",async(req,res)=>{
+    await Movie.deleteOne({name:req.params.name},(err,msg)=>{
+        if(err){
+            res.status(500).json({
+                error:err
+            })
+        }
+        else{
+            res.status(200).json({
+                msg:msg
+            })
+        }
+ //const imovie = await Movie.find()
+   //         res.send(imovie)
+    })
+})
+
+module.exports = router 
+
+-------------------------------------------------------------------------------------
+
+***Run API***
+
+nodemon index
+http://localhost:3000/api/movies
+
+-------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------------
+
+***Run API***
+
+npm i
+
+ng new project name
+ng g s services name 
+ng g c camponent name
+
+ng serve -o
+
+-------------------------------------------------------------------------------------
+
+***app-routing.module.ts***
+
+import { MoviesComponent } from './movies/movies.component';
+import { NotfoundComponent } from './notfound/notfound.component';
+
+const routes: Routes = [
+  {path:'movies',component:MoviesComponent},
+  {path:'',redirectTo:'movies',pathMatch:'full'},
+  {path:'addstud/:data',component:AddstudComponent},
+  {path:'**',component:NotfoundComponent}
+];
+
+-------------------------------------------------------------------------------------
+
+***app.component.ts***
+
+<app-navbar></app-navbar>
+<router-outlet></router-outlet>
+
+-------------------------------------------------------------------------------------
+
+***app.module.ts***
+
+import { NavbarComponent } from './navbar/navbar.component';
+import { MoviesComponent } from './movies/movies.component';
+import { NotfoundComponent } from './notfound/notfound.component';
+import { HttpClientModule } from '@angular/common/http';
+
+@NgModule({
+  declarations: [
+    AppComponent,
+    NavbarComponent,
+    MoviesComponent,
+    NotfoundComponent
+  ],
+  imports: [
+    BrowserModule,
+    AppRoutingModule,
+    HttpClientModule
+
+-------------------------------------------------------------------------------------
+
+***Create Service***
+***inside the -->movie.service.ts<--***
+
+import { iMovie } from '../Model/movie';
+import { HttpClient } from '@angular/common/http'
+import { Observable } from 'rxjs';
+
+export class MovieService {
+
+  url = "http://localhost:3000/api/movies";
+
+  constructor(private _http: HttpClient) { }
+
+  getMovie(): Observable<iMovie[]> {
+    return this._http.get<iMovie[]>(this.url);
+  }
+
+  DeleteMovie(movie: any): Observable<iMovie> {
+    return this._http.delete<iMovie>(this.url + "/" + movie.name, { headers: { 'Content-Type': 'application/json' } })
+  }
+
+  //getstud():Observable<Istudent[]>{
+  // return this._http.get<Istudent[]>(this._url+"display");
+  //}
+
+
+  //save(stud:Istudent){
+  //  return this._http.post(this._url + "addstud",stud);
+  //}
+
+
+  //delstud(id){
+  //  return this._http.delete(this._url +"delete/"+id);
+  //}
+
+
+  //updatestud(stud){
+  //  return this._http.put(this._url +"updatestud",stud);
+  //}
+
+}
+
+-------------------------------------------------------------------------------------
+
+***Create model***
+***movie.ts***
+
+export interface iMovie{
+    _id?:string,
+    name:string,
+    rating:number
+}
+
+-------------------------------------------------------------------------------------
+
+***Create navbar***
+***navbar.component.html***
+
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <a class="navbar-brand" href="#">Navbar</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav">
+        <li class="nav-item active">
+          <a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" routerLink="movies" href="#">Movies</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#">Student</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link disabled" href="#">Disabled</a>
+        </li>
+      </ul>
+    </div>
+  </nav>
+
+-------------------------------------------------------------------------------------
+
+***Create notfound page***
+***notefound.component.html***
+
+-------------------------------------------------------------------------------------
+
+***Create Movie component***
+***movies.component.html***
+
+<table class="table">
+    <thead>
+        <th>Id</th>
+        <th>Name</th>
+        <th>Rating</th>
+        <th>Actions</th>
+    </thead>
+    <tbody>
+        <tr *ngFor="let m of myMovie">
+            <td>{{m._id}}</td>
+            <td>{{m.name}}</td>
+            <td>{{m.rating}}</td>
+            <td>
+                <button (click)="delete(m)" class="btn btn-danger">Delete</button>
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+-------------------------------------------------------------------------------------
+
+***movies.component.ts***
+
+import { iMovie } from '../Model/movie';
+import { MovieService } from '../service/movie.service'; 
+
+export class MoviesComponent implements OnInit {
+
+  myMovie:any = [];
+
+  constructor(private _movieService:MovieService) { }
+
+  ngOnInit(): void {
+    this._movieService.getMovie().subscribe((data:any)=>{
+      this.myMovie = data;
+    })
+  }
+
+  delete(movie:any){
+    this._movieService.DeleteMovie(movie).subscribe(data=>{
+      console.log(data);
+    })
+  }
+
+}
+
+
+	
+-------------------------------------------------------------------------------------
+
+***ADD Student***
+
+.html
+<hr>
+<form [formGroup]="studform" name="studform" (ngSubmit)=submit()>
+    <div>
+        <label for="fname">Enter Name:</label>
+        <input matInput formControlName="fname">
+        <input type="text" class="form-control" formControlName="fname">
+        <div class="alert alert-danger" *ngIf="studform.get('fname').invalid && (studform.get('fname').touched || studform.get('fname').dirty)">
+          <div *ngIf="studform.get('fname').errors.required">Please enter name</div>
+         <div *ngIf="studform.get('fname').errors.minlength">Minimun length should be three..!!</div>
+        </div>
+    </div>
+    <div>
+        <label for="pswd">Enter Password:</label>
+        <input type="password" class="form-control" formControlName="pswd">
+    </div>
+    <button class="btn btn-primary" type="submit">Save</button>
+</form>
+
+.ts
+import { Component, OnInit } from '@angular/core';
+import { FormGroup, FormControl, Validators } from '@angular/forms';
+import {StudentService} from '../student.service';
+import { Istudent } from '../Student';
+import { ActivatedRoute, Router } from '@angular/router';
+
+@Component({
+  selector: 'app-addstud',
+  templateUrl: './addstud.component.html',
+  styleUrls: ['./addstud.component.css']
+})
+export class AddstudComponent implements OnInit {
+
+  constructor(private _studservice:StudentService,private activateroute:ActivatedRoute,private router:Router) { }
+  stud = new Istudent();
+  
+  ngOnInit() {
+    
+    if (this.activateroute.snapshot.paramMap.get('data')!=null){ 
+    this.stud = JSON.parse(this.activateroute.snapshot.paramMap.get('data'));
+      this.studform.controls['fname'].setValue(this.stud.name);
+      this.studform.controls['pswd'].setValue(this.stud.pswd);  
+    }
+  }
+
+studform = new FormGroup({
+  fname : new FormControl('',[Validators.required,Validators.minLength(3)]),
+  pswd:new FormControl('')
+})
+
+submit(){
+
+  if(this.stud._id==undefined){
+    //adding new student
+    this.stud.name = this.studform.get('fname').value;
+    this.stud.pswd = this.studform.get('pswd').value;
+    this._studservice.save(this.stud).subscribe(data => {
+      alert(data['message']);
+    })
+  }
+  else{
+
+    this.stud.name=this.studform.get('fname').value;
+    this.stud.pswd=this.studform.get('pswd').value;
+
+    this._studservice.updatestud(this.stud).subscribe((data:any[])=>{
+
+      data['message'].nModified==1?alert("updated successfully"):alert(JSON.stringify(data['message']));
+      this.router.navigate(['/studs']);
+      
+    })
+
+  }
+ 
+}
+ 
+}
+
+-------------------------------------------------------------------------------------
+
+***Pagination***
+
+Component.html
+
+<table class="table">
+    <thead>
+        <th (click)="sort('id')">Id</th>
+        <th (click)="sort('title')">Title</th>
+        <th (click)="sort('body')">Body</th>
+    </thead>
+    <tbody>
+        <tr *ngFor="let item of data | paginate: { itemsPerPage: 10, currentPage: p } | orderBy:key:reverse">
+            <td>{{item.id}}</td>
+            <td>{{item.title}}</td>
+            <td>{{item.body}}</td>
+        </tr>
+    </tbody>
+</table>
+<pagination-controls (pageChange)="p = $event"></pagination-controls>
+
+
+
+**Component.ts**
+
+data:any = []
+  p: number = 1;
+
+  key = 'id';
+  reverse:boolean=false;
+  constructor(private _postService:PostService) { }
+
+  ngOnInit(): void {
+    this._postService.getData().subscribe(res=>{
+      this.data=res;
+      console.log(this.data)
+    })
+  }
+
+  sort(key:string){
+    this.key = key;
+    this.reverse=!this.reverse;
+  }
+
+
+
+
